@@ -11,7 +11,7 @@
     "client:dev": "npm --prefix client run dev",
     "client:build": "npm --prefix client run build",
     "client:test": "npm --prefix client test",
-    "test:e2e": "npx playwright test"
+    "test:e2e": "npm --prefix client run test:e2e"
   },
   "keywords": [
     "task-management",
