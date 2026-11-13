@@ -1,90 +1,117 @@
 # TaskFlow 📋
 
-TaskFlow is a modern, enterprise-grade, full-stack task and workflow management platform engineered with a clean layered architecture, robust security validations, an interactive productivity dashboard, dual task views (List & Kanban), and an advanced Multi-Canvas Theming & Accent Color Studio.
+TaskFlow is a modern, responsive full-stack task and workflow management application built with React, Vite, Node.js, Express, and PostgreSQL. It features dual task management views (interactive List and Kanban board), dynamic search and filtering, real-time KPI metrics, an independent multi-canvas theming studio, and multi-layered security validation.
 
 ---
 
-## 🌟 Key Features
+## 🌐 Live Application & Repository
+
+| Resource | Link | Description |
+| :--- | :--- | :--- |
+| **Live Application** | **[https://taskllow.vercel.app](https://taskllow.vercel.app)** | Publicly accessible production deployment. Visitors can create an account and explore all features. |
+| **GitHub Repository** | **[https://github.com/Soumyajit-2808/Taskllow](https://github.com/Soumyajit-2808/Taskllow)** | Complete source code, automated test suites, and documentation. |
+
+> [!NOTE]
+> **Live Demo Notice:** The backend is hosted on Render's free tier. If the service has been idle for more than 15 minutes, the first API request may experience a **30–50 second cold start** while the container spins up. Subsequent requests run at normal speed.
+
+---
+
+## 📑 Table of Contents
+
+- [Key Features](#-key-features)
+- [Technology Stack](#-technology-stack)
+- [System Architecture](#-system-architecture)
+- [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#1-installation)
+  - [Environment Configuration](#2-environment-configuration)
+  - [Database Migrations](#3-database-migrations)
+  - [Running Locally](#4-running-locally)
+- [Environment Variables Reference](#-environment-variables-reference)
+- [Production Deployment](#-production-deployment)
+- [Testing & Quality Assurance](#-testing--quality-assurance)
+- [Security Model](#-security-model)
+- [API Reference Summary](#-api-reference-summary)
+- [License](#-license)
+
+---
+
+## ✨ Key Features
 
 ### 1. Dual-View Task Management
-- **Interactive List View**: High-density table view with inline status toggles, priority badges, category chips, and due date alerts.
-- **Column-Based Kanban Board**: Stage-driven workflow categorizing tasks into **To Do** (`pending`), **In Progress** (`in_progress`), and **Completed** (`completed`) with one-click stage advancement buttons.
-- **Dynamic Search & Filtering**: Instant fuzzy text search, category filtering, status filtering (`pending`, `in_progress`, `completed`, `archived`), and multi-field sorting (due date, priority, title, creation date).
+- **Interactive List View:** High-density table layout with inline status checkboxes, priority badges, custom category indicators, formatted due dates with overdue highlighting, and quick-action edit/delete triggers.
+- **Stage-Driven Kanban Board:** Three workflow columns (**To Do**, **In Progress**, **Completed**) with card counters, bidirectional stage advancement buttons, and direct task creation per column.
 
 ### 2. Live Productivity & Metrics Dashboard
-- Real-time KPIs calculated dynamically:
-  - **Total Tasks**: Total count across all categories.
-  - **Completed**: Total tasks successfully completed.
-  - **Overdue**: Immediate alert highlighting past-due tasks.
-  - **Completion Rate**: Visual progress indicator and percentage bar.
+- Real-time aggregated KPI summary cards:
+  - **Total Tasks:** Cumulative count across all user categories.
+  - **In Progress:** Tasks currently under active execution.
+  - **Completed:** Successfully finished tasks.
+  - **Overdue:** Immediate visual alert for past-due tasks.
+- **Interactive Filtering:** Clicking any metric card instantly filters the active task view.
 
-### 3. Multi-Canvas Theming & Independent Accent Color Studio
-- **6 Canvas Themes**:
-  - `Dark Slate`: Balanced midnight charcoal canvas with slate undertones.
-  - `Clean Light`: Crisp daylight palette for daylight focus and high readability.
-  - `OLED Pitch`: Pure true-black (`#000000`) canvas with ultra contrast.
-  - `Evergreen Nocturne`: Botanical deep pine aesthetic with emerald undertones.
-  - `Cyberpunk Twilight`: Neon midnight atmosphere with rich violet glow.
-  - `Nordic Frost`: Cold arctic navy and steel gray surfaces.
-- **8 Accent Color Presets**:
-  - `Electric Indigo` (`#6366f1`), `Ocean Sapphire` (`#0ea5e9`), `Emerald Mint` (`#10b981`), `Neon Rose` (`#f43f5e`), `Sunset Amber` (`#f59e0b`), `Amethyst Purple` (`#8b5cf6`), `Teal Horizon` (`#14b8a6`), `Crimson Ruby` (`#ef4444`).
-- **Accent Color Studio**: Custom hex color picker with real-time WCAG 2.1 contrast calculation and instant `localStorage` persistence.
+### 3. Dynamic Search & Multi-Dimensional Filtering
+- **Instant Search:** Debounced text search matching task titles and descriptions (`Ctrl+K` hotkey focus).
+- **Navigation Views:** Quick sidebar views for **All Tasks**, **Due Today**, **Overdue**, and **Completed**.
+- **Filter Toolbar:** Combined dropdown filtering by status (`pending`, `in_progress`, `completed`, `archived`) and priority (`low`, `medium`, `high`, `urgent`).
+- **Category Filtering:** Sidebar category selection with task count badges.
 
-### 4. Advanced Security & Email Authenticity Verification
-- **Anti-Disposable Email Gate**: Blocks 37+ known disposable/burner email providers (`mailinator`, `guerrillamail`, `tempmail`, `10minutemail`, `yopmail`, etc.).
-- **DNS Mail Exchange (MX) Verification**: Active DNS lookup (`node:dns.promises.resolveMx`) ensuring the domain has valid mail routing records.
-- **Gibberish & Keyboard-Smashing Detection**: Algorithmic heuristic analysis detecting unpronounceable consonant clusters, keyboard walks, and character repetition.
-- **Authentication & Encryption**: Secure JWT Bearer token authentication (with HTTP-only cookie support), native `bcrypt` password hashing (default 12 salt rounds, configurable via `BCRYPT_SALT_ROUNDS`).
-- **HTTP Protection**: Dual-window Express rate limiters (auth brute-force mitigation: 15 req / 15 min; general API: 300 req / 15 min), Helmet HTTP headers, CORS origin whitelisting (`CLIENT_URL` / `CORS_ORIGIN`), and strict Zod schema validation.
+### 4. Custom Category Management
+- User-scoped custom category creation with color picker presets.
+- Category assignment to tasks and safe deletion with foreign-key nullification (`ON DELETE SET NULL`).
 
-### 5. API Testing & Postman Workspace
-- Built-in Postman Collection (`postman/collections/TaskFlow_API.postman_collection.json`) and environment variables (`postman/environments/TaskFlow_Local.postman_environment.json`) covering all authenticated workflows, health checks, categories, and task management edge cases.
+### 5. Multi-Canvas Theming & Accent Color Studio
+- **6 Base Canvas Themes:** `Dark Slate`, `Clean Light`, `OLED Pitch`, `Evergreen Nocturne`, `Cyberpunk Twilight`, and `Nordic Frost`.
+- **8 Accent Color Presets:** Electric Indigo, Ocean Sapphire, Emerald Mint, Neon Rose, Sunset Amber, Amethyst Purple, Teal Horizon, and Crimson Ruby.
+- **Custom Accent Studio:** Real-time hex color input, WCAG 2.1 contrast calculation, dynamic CSS variable derivation (`--primary-50` through `--primary-700`), and `localStorage` persistence.
+- **Header Quick-Toggle:** One-click instant daylight/nightlight toggle.
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technologies |
-|---|---|
-| **Frontend** | React 18.3.1, Vite 5, Lucide Icons, Custom CSS Variable Design System, Context API, Native Fetch API Client |
-| **Backend** | Node.js, Express.js (4-Tier Layered Architecture: Routes ➔ Controllers ➔ Services ➔ Repositories) |
-| **Database** | PostgreSQL, `pg` connection pooling (max 20, 30s idle timeout), parameterized SQL migrations |
-| **Validation & Security** | Zod, JSON Web Tokens (`jsonwebtoken`), native `bcrypt` (12 rounds), Helmet, Express Rate Limit, Email Heuristics & DNS MX Validation |
-| **Testing** | Jest, Supertest (9 unit/integration test suites, 76 tests), Playwright (E2E browser automation) |
+| Layer | Technologies Used |
+| :--- | :--- |
+| **Frontend** | React 18.3, Vite 5, Lucide React Icons, Context API (`AuthContext`, `ThemeContext`), CSS Custom Properties Design Tokens |
+| **Backend** | Node.js (v18+), Express.js (4-Tier Layered Architecture: Routes ➔ Controllers ➔ Services ➔ Repositories) |
+| **Database** | PostgreSQL 14+, `pg` (node-postgres) connection pooling, parameterized SQL migrations |
+| **Security & Auth** | JSON Web Tokens (`jsonwebtoken`), native `bcrypt` (12 salt rounds), Helmet HTTP headers, CORS, Express Rate Limit, Zod validation |
+| **Automated Testing** | Jest, Supertest (unit & integration), Playwright (end-to-end browser automation) |
 
 ---
 
-## 🏗️ Architecture & Project Structure
+## 🏗️ System Architecture
 
-TaskFlow enforces strict separation of concerns across a monorepo structure:
+TaskFlow enforces strict separation of concerns across a clean monorepo layout:
 
-```
+```text
 TaskFlow/
-├── client/                     # React Single Page Application (Vite)
-│   ├── e2e/                    # Playwright end-to-end user journey tests
+├── client/                     # Frontend Single Page Application (React + Vite)
+│   ├── e2e/                    # Playwright end-to-end test suites & global setup
 │   ├── src/
-│   │   ├── components/         # UI Components (Header, TaskModal, Kanban, List, Metrics, ThemeModal, etc.)
-│   │   ├── context/            # AuthContext & ThemeContext
-│   │   ├── services/           # Native fetch-based API client with JWT bearer handling
-│   │   └── index.css           # Design tokens, canvas themes & CSS variables
-│   ├── playwright.config.js    # Playwright browser testing configuration
-│   ├── vite.config.js          # Vite bundler configuration (dev proxy to port 5000)
-│   └── DESIGN_SPEC.md          # Complete design system & wireframe specifications
-├── server/                     # Express.js REST API
+│   │   ├── components/         # Modular UI components (Auth, Header, Sidebar, Kanban, List, Modals)
+│   │   ├── context/            # AuthContext (session state) & ThemeContext (design tokens)
+│   │   ├── services/           # Native fetch API client with JWT Bearer handling
+│   │   ├── App.jsx             # Main workspace orchestration & keyboard hotkeys
+│   │   └── index.css           # Core design tokens, theme palettes & reset rules
+│   ├── playwright.config.js    # Playwright configuration (ports, test DB injection, reporters)
+│   └── vite.config.js          # Vite configuration with local API proxy
+├── server/                     # Backend REST API (Express.js)
 │   ├── src/
-│   │   ├── config/             # Environment variable validation & database pool
-│   │   ├── database/           # SQL migration files & migration runner
-│   │   ├── middlewares/        # Auth guard, error handler, rate limiters, validation
+│   │   ├── config/             # Environment validation (env.js) & DB pool (pool.js)
+│   │   ├── database/           # Transactional SQL migrations & migration runner
+│   │   │   └── migrations/     # 001_create_users.sql, 002_create_categories.sql, 003_create_tasks.sql
+│   │   ├── middlewares/        # JWT auth guard, centralized error handler, rate limiters, Zod validator
 │   │   ├── modules/            # Domain modules (auth, categories, tasks, health)
-│   │   │   ├── *.controller.js # HTTP request extraction & envelope formatting
-│   │   │   ├── *.service.js    # Core business rules & analytical computation
-│   │   │   ├── *.repository.js # Raw parameterized PostgreSQL queries
-│   │   │   └── *.validation.js # Zod schemas
-│   │   └── utils/              # Email authenticity validator, custom errors, responses
-│   └── tests/                  # Jest & Supertest unit and integration test suites (9 suites)
-├── postman/                    # Pre-configured Postman collection and environment specs
-│   ├── collections/            # TaskFlow_API.postman_collection.json
-│   └── environments/           # TaskFlow_Local.postman_environment.json
+│   │   │   ├── *.controller.js # Request parsing & standardized JSON response formatting
+│   │   │   ├── *.service.js    # Business logic, KPI calculations, and authorization checks
+│   │   │   ├── *.repository.js # Raw parameterized PostgreSQL queries (user-scoped)
+│   │   │   └── *.validation.js # Zod validation schemas
+│   │   ├── utils/              # Email authenticity validator, custom errors, responses, JWT helpers
+│   │   ├── app.js              # Express application assembly & security middleware
+│   │   └── server.js           # HTTP server initialization & graceful shutdown handlers
+│   └── tests/                  # Jest & Supertest unit and integration test suites
+├── postman/                    # Pre-configured Postman API collection and environment specs
 └── package.json                # Monorepo orchestration scripts
 ```
 
@@ -93,139 +120,209 @@ TaskFlow/
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - **Node.js**: v18.0.0 or higher
-- **PostgreSQL**: v14.0 or higher running on port `5432`
+- **PostgreSQL**: v14.0 or higher running locally or in the cloud
 
 ---
 
-### 1. Database Setup
+### 1. Installation
 
-Create a PostgreSQL database for TaskFlow:
+Clone the repository and install dependencies for both client and server:
 
-```sql
-CREATE DATABASE taskflow_db;
+```bash
+git clone https://github.com/Soumyajit-2808/Taskllow.git
+cd Taskllow
+
+# Install backend dependencies
+npm --prefix server install
+
+# Install frontend dependencies
+npm --prefix client install
 ```
 
 ---
 
 ### 2. Environment Configuration
 
-Copy the example environment files for both server and client:
+Copy the example environment files:
 
 ```bash
-# Server environment
+# Server configuration
 cp server/.env.example server/.env
 
-# Client environment
+# Client configuration
 cp client/.env.example client/.env
 ```
 
-Ensure `server/.env` contains your PostgreSQL credentials and server settings:
-```env
-PORT=5000
-NODE_ENV=development
-CLIENT_URL=http://localhost:5173
-
-# Database Configuration
-DATABASE_URL=postgres://postgres:postgres@localhost:5432/taskflow_db
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=taskflow_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_POOL_MAX=20
-DB_IDLE_TIMEOUT_MILLIS=30000
-
-# Authentication & Security
-JWT_SECRET=supersecret_taskflow_jwt_key_change_in_production_123456
-JWT_EXPIRES_IN=7d
-BCRYPT_SALT_ROUNDS=12
-```
+Edit `server/.env` with your PostgreSQL database credentials and server settings. See [Environment Variables Reference](#-environment-variables-reference) below.
 
 ---
 
-### 3. Installation & Database Migration
+### 3. Database Migrations
 
-Install dependencies and run database migrations from the root directory:
+Run the database migration script to initialize the schema:
 
 ```bash
-# Install server & client dependencies
-npm --prefix server install
-npm --prefix client install
-
-# Run database migrations
+# Run migrations using the root script
 npm run server:migrate
 ```
 
+This applies all transactional SQL migration files (`001_create_users.sql`, `002_create_categories.sql`, `003_create_tasks.sql`) and records them in `schema_migrations`.
+
 ---
 
-### 4. Running the Application
+### 4. Running Locally
 
-You can run both backend and frontend using root scripts:
+Start both the backend API and the frontend development server:
 
 ```bash
-# Start backend server (starts on http://localhost:5000)
+# Terminal 1: Start backend API server (runs on http://localhost:5000)
 npm run server:dev
 
-# In a separate terminal, start frontend client (starts on http://localhost:5173)
+# Terminal 2: Start frontend client (runs on http://localhost:5173)
 npm run client:dev
 ```
 
-*Note: The Vite dev server proxies `/api` requests directly to `http://localhost:5000`.*
+Open [http://localhost:5173](http://localhost:5173) in your browser. The Vite dev server automatically proxies `/api` calls to `http://localhost:5000`.
 
 ---
 
-## 🔌 API Endpoints Summary
+## 🔐 Environment Variables Reference
 
-All API responses adhere to standardized JSON envelopes:
-- **Success**: `{ "success": true, "data": ... }`
-- **Error**: `{ "success": false, "error": { "code": "...", "message": "...", "details": [...] } }`
+Never commit `.env` files containing real passwords, secret keys, or database connection strings.
 
-| Method | Endpoint | Description | Protected |
-|---|---|---|---|
-| `GET` | `/` | Root API welcome route and endpoint catalog | No |
-| `GET` | `/api/v1/health` | Health check & database connection probe | No |
-| `POST` | `/api/v1/auth/register` | Register new user with email authenticity checks | No |
-| `POST` | `/api/v1/auth/login` | Login user, issue JWT bearer token & set cookie | No |
-| `GET` | `/api/v1/auth/me` | Fetch authenticated user profile | Yes |
-| `POST` | `/api/v1/auth/logout` | Logout user & clear authentication cookie | Yes |
-| `GET` | `/api/v1/categories` | List user custom categories with task count | Yes |
-| `POST` | `/api/v1/categories` | Create a new custom category | Yes |
-| `PUT` | `/api/v1/categories/:id` | Update category name and color | Yes |
-| `DELETE` | `/api/v1/categories/:id` | Delete a category | Yes |
-| `GET` | `/api/v1/tasks/stats/summary` | Retrieve aggregated task KPI summary metrics | Yes |
-| `GET` | `/api/v1/tasks` | List tasks with filters (`status`, `categoryId`, `priority`, `search`, `sortBy`) | Yes |
-| `POST` | `/api/v1/tasks` | Create a new task (default status: `pending`) | Yes |
-| `GET` | `/api/v1/tasks/:id` | Retrieve single task details by UUID | Yes |
-| `PUT` | `/api/v1/tasks/:id` | Full update of an existing task | Yes |
-| `PATCH` | `/api/v1/tasks/:id` | Partial update of a task (`status`, `priority`, `title`, `description`, `categoryId`, `dueDate`) | Yes |
-| `DELETE` | `/api/v1/tasks/:id` | Soft-delete a task | Yes |
+### Backend (`server/.env`)
 
-*Valid task status enum values:* `pending` (displays as "To Do" in UI), `in_progress`, `completed`, and `archived`.  
-*Valid task priority enum values:* `low`, `medium`, `high`, and `urgent`.
+| Variable | Required | Default | Description |
+| :--- | :---: | :--- | :--- |
+| `PORT` | No | `5000` | Port on which the Express server listens. |
+| `NODE_ENV` | No | `development` | Environment mode (`development`, `test`, `production`). |
+| `CLIENT_URL` | Yes | `http://localhost:5173` | Allowed CORS origin (must match your frontend domain in production). |
+| `DATABASE_URL` | Optional | `null` | Full PostgreSQL connection URI (preferred in cloud environments). |
+| `DB_HOST` | Conditional | `localhost` | Database host (used if `DATABASE_URL` is not provided). |
+| `DB_PORT` | Conditional | `5432` | Database port. |
+| `DB_NAME` | Conditional | `taskflow_db` | Database name. |
+| `DB_USER` | Conditional | `postgres` | Database username. |
+| `DB_PASSWORD` | Conditional | `postgres` | Database password. |
+| `DB_POOL_MAX` | No | `20` | Maximum connections in the `pg` pool. |
+| `DB_IDLE_TIMEOUT_MILLIS` | No | `30000` | Idle connection timeout in milliseconds. |
+| `JWT_SECRET` | **Yes** | — | Secret key for signing JWTs (must be a strong 32+ char string in production). |
+| `JWT_EXPIRES_IN` | No | `7d` | JWT token validity duration. |
+| `BCRYPT_SALT_ROUNDS` | No | `12` | Cost factor for password hashing. |
+| `SKIP_DNS_CHECK` | No | `false` | Set to `true` to bypass outbound DNS MX checks in restricted network environments. |
+
+### Frontend (`client/.env`)
+
+| Variable | Required | Default | Description |
+| :--- | :---: | :--- | :--- |
+| `VITE_API_BASE_URL` | No | `/api/v1` | Base URL for API requests. Set to the production backend URL (e.g. `https://api.example.com/api/v1`) during production build. |
 
 ---
 
-## 🧪 Testing Suite
+## ☁️ Production Deployment
 
-### Backend Unit & Integration Tests (Jest + Supertest)
-Runs 9 test suites (76 tests) covering domain services, email heuristics, validation schemas, and database operations:
+TaskFlow is deployed on a free cloud architecture:
 
-```bash
-npm run server:test
+```text
+┌─────────────────────────┐       HTTPS / REST       ┌─────────────────────────┐
+│   Vercel (Hobby Tier)   │  ─────────────────────>  │   Render (Free Service) │
+│  Frontend React 18 SPA  │                          │    Express.js Node API  │
+└─────────────────────────┘                          └────────────┬────────────┘
+                                                                  │  SSL (Port 5432)
+                                                                  ▼
+                                                     ┌─────────────────────────┐
+                                                     │    Neon (Serverless)    │
+                                                     │      PostgreSQL 16      │
+                                                     └─────────────────────────┘
 ```
 
-### End-to-End Browser Tests (Playwright)
-Executes end-to-end browser journeys covering user registration, task creation, status advancement, Kanban column views, and theme switching:
+- **Frontend (Vercel):**
+  - **Framework Preset:** Vite
+  - **Root Directory:** `client`
+  - **Build Command:** `npm run build`
+  - **Output Directory:** `dist`
+  - **Environment Variable:** `VITE_API_BASE_URL=https://<your-render-service>.onrender.com/api/v1`
+  - **Edge CDN:** Delivers static assets with global caching and instant response times.
+- **Backend (Render):**
+  - **Service Type:** Web Service (Node)
+  - **Root Directory:** `server`
+  - **Build Command:** `npm install`
+  - **Start Command:** `npm start`
+  - **Environment Variables:** `NODE_ENV=production`, `DATABASE_URL=<neon-connection-string>`, `JWT_SECRET=<secure-random-secret>`, `CLIENT_URL=https://<your-vercel-domain>.vercel.app`
+- **Database (Neon):**
+  - Managed PostgreSQL 16 with native SSL and connection pooling.
+  - Persistent storage without monthly expiration.
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+TaskFlow includes an automated testing suite spanning unit, integration, and end-to-end browser tests.
+
+### Reported Verification Results
+
+| Suite | Framework | Total Tests | Status | Scope |
+| :--- | :--- | :---: | :---: | :--- |
+| **Backend Unit & Integration** | Jest + Supertest | **76 / 76** | **Passed** | 9 test suites covering auth, tasks, categories, health endpoints, services, Zod schemas, and email validation heuristics. |
+| **End-to-End Browser Tests** | Playwright | **15 / 15** | **Passed** | Full user journeys: registration, session rehydration, task CRUD, Kanban advancement, theme persistence, and input validation. |
+| **Production Build** | Vite 5 | — | **Passed** | Zero errors, zero warnings across 1,500+ modules (build time: ~2.4s). |
+| **Database Isolation** | PostgreSQL | — | **Verified** | E2E runs execute against a dedicated `taskflow_test_db` with automated pre-test table resets; development data remains untouched. |
+
+### Running Tests Locally
 
 ```bash
+# Run backend Jest unit and integration tests
+npm run server:test
+
+# Run frontend Playwright end-to-end browser tests
 npm run test:e2e
 ```
-*(Or navigate to `client/` and run `npm test` / `npx playwright test`).*
 
 ---
 
-## 🛡️ Financial & Licensing Policy
+## 🛡️ Security Model
 
-TaskFlow is developed strictly using **100% Free and Open-Source Software (FOSS)**. No external paid APIs, billable cloud tiers, or proprietary services are required.
+- **Authentication:** Stateless JSON Web Tokens (JWT) passed via `Authorization: Bearer <token>` header with HTTP-only cookie fallback.
+- **Password Protection:** Passwords hashed with native `bcrypt` using 12 salt rounds. Minimum 8 characters with alphanumeric validation enforced.
+- **SQL Injection Prevention:** 100% of database queries use parameterized SQL via `pg`. Direct string interpolation into queries is prohibited.
+- **Multi-Tenant User Scoping:** Every task and category query strictly enforces `WHERE user_id = $1`. Cross-user data access is structurally impossible.
+- **Email Authenticity Pipeline:**
+  - Blocks 37+ known disposable and burner email domains (`mailinator.com`, `guerrillamail.com`, `tempmail.com`, etc.).
+  - Algorithmic gibberish detection blocks keyboard walk patterns, excessive repeated characters, and unpronounceable consonant clusters.
+  - Active DNS lookup (`node:dns.promises.resolveMx`) verifies that the domain possesses active mail server records before account creation.
+- **HTTP Hardening:** Helmet-configured HTTP security headers, CORS origin whitelisting, and Express rate limiting (15 req/15 min on auth routes; 300 req/15 min on API routes).
+- **Production Secret Guard:** The server throws a fatal startup error in `NODE_ENV=production` if `JWT_SECRET` is missing or uses the default fallback.
+
+---
+
+## 🔌 API Reference Summary
+
+All API responses follow a standardized JSON envelope structure:
+- **Success:** `{ "success": true, "data": ... }`
+- **Error:** `{ "success": false, "error": { "code": "...", "message": "...", "details": [...] } }`
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :---: |
+| `GET` | `/` | API status and endpoint catalog | No |
+| `GET` | `/api/v1/health` | Health check & database connectivity probe | No |
+| `POST` | `/api/v1/auth/register` | Register new user with email authenticity validation | No |
+| `POST` | `/api/v1/auth/login` | Authenticate user and issue JWT bearer token | No |
+| `GET` | `/api/v1/auth/me` | Retrieve authenticated user profile | **Yes** |
+| `POST` | `/api/v1/auth/logout` | Clear session cookie | **Yes** |
+| `GET` | `/api/v1/categories` | List user custom categories with task counts | **Yes** |
+| `POST` | `/api/v1/categories` | Create a new category | **Yes** |
+| `PUT` | `/api/v1/categories/:id` | Update category name and color | **Yes** |
+| `DELETE` | `/api/v1/categories/:id` | Delete a category | **Yes** |
+| `GET` | `/api/v1/tasks/stats/summary` | Retrieve aggregated KPI metrics summary | **Yes** |
+| `GET` | `/api/v1/tasks` | List tasks with filters (`status`, `categoryId`, `priority`, `search`, `sortBy`) | **Yes** |
+| `POST` | `/api/v1/tasks` | Create a new task (default status: `pending`) | **Yes** |
+| `GET` | `/api/v1/tasks/:id` | Retrieve single task details by UUID | **Yes** |
+| `PUT` | `/api/v1/tasks/:id` | Full update of an existing task | **Yes** |
+| `PATCH` | `/api/v1/tasks/:id` | Partial update of a task (`status`, `priority`, `title`, etc.) | **Yes** |
+| `DELETE` | `/api/v1/tasks/:id` | Soft-delete a task (`deleted_at` timestamp) | **Yes** |
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](package.json).
