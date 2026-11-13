@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import crypto from 'crypto';
 
 test.describe('TaskFlow Full Application End-to-End User Journey', () => {
   const testUser = {
     fullName: 'Alex Morgan',
-    email: `alex_${Date.now()}@example.com`,
+    email: `alex_${crypto.randomUUID()}@example.com`,
     password: 'SecurePassword123!'
   };
 
@@ -20,9 +21,8 @@ test.describe('TaskFlow Full Application End-to-End User Journey', () => {
 
     // Switch to Register form
     const createAccountBtn = page.getByRole('button', { name: /create an account/i });
-    if (await createAccountBtn.isVisible()) {
-      await createAccountBtn.click();
-    }
+    await expect(createAccountBtn).toBeVisible();
+    await createAccountBtn.click();
 
     // Fill registration
     await page.getByLabel('Full Name').fill(testUser.fullName);
@@ -41,35 +41,33 @@ test.describe('TaskFlow Full Application End-to-End User Journey', () => {
 
     // Fill Task form
     await page.getByLabel(/Title/i).fill('Setup Continuous Integration Pipeline');
-    await page.getByLabel(/Priority/i).selectOption('high');
+    await page.getByLabel('Priority', { exact: true }).selectOption('high');
     await page.getByLabel(/Description/i).fill('Configure GitHub Actions to run tests automatically on push.');
     await page.locator('#btn-save-task').click();
 
     // Verify task appears in List View
     await expect(page.getByText('Setup Continuous Integration Pipeline')).toBeVisible();
-    await expect(page.getByText('HIGH')).toBeVisible();
+    await expect(page.getByText('HIGH', { exact: true })).toBeVisible();
 
     // Switch to Kanban Board View
     await page.getByRole('button', { name: /Board/i }).click();
     await expect(page.getByText('To Do')).toBeVisible();
-    await expect(page.getByText('In Progress')).toBeVisible();
-    await expect(page.getByText('Completed')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add task to In Progress' }).locator('..').getByText('In Progress')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Add task to Completed' }).locator('..').getByText('Completed')).toBeVisible();
     await expect(page.getByText('Setup Continuous Integration Pipeline')).toBeVisible();
 
     // Advance task from To Do -> In Progress
-    const advanceBtn = page.getByRole('button', { name: /Advance/i });
-    if (await advanceBtn.isVisible()) {
-      await advanceBtn.click();
-    }
+    const advanceBtn = page.getByRole('button', { name: /Move to in progress/i });
+    await expect(advanceBtn).toBeVisible();
+    await advanceBtn.click();
 
     // Switch back to List View
     await page.getByRole('button', { name: /List/i }).click();
 
     // Mark task completed via checkbox
-    const completeCheckbox = page.getByRole('button', { name: /Mark task completed/i }).first();
-    if (await completeCheckbox.isVisible()) {
-      await completeCheckbox.click();
-    }
+    const completeCheckbox = page.getByRole('button', { name: 'Mark task completed' });
+    await expect(completeCheckbox).toBeVisible();
+    await completeCheckbox.click();
 
     // Test Sign Out
     await page.getByRole('button', { name: /Sign Out/i }).click();
