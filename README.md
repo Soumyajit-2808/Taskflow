@@ -51,19 +51,19 @@ TaskFlow is a modern, responsive full-stack task and workflow management applica
 - **Interactive Filtering:** Clicking any metric card instantly filters the active task view.
 
 ### 3. Dynamic Search & Multi-Dimensional Filtering
-- **Instant Search:** Debounced text search matching task titles and descriptions (`Ctrl+K` hotkey focus).
-- **Navigation Views:** Quick sidebar views for **All Tasks**, **Due Today**, **Overdue**, and **Completed**.
+- **Instant Search:** Debounced text search matching task titles and descriptions (`Ctrl+K` / `Cmd+K` hotkey focus).
+- **Navigation Views:** Quick sidebar views for **All Tasks**, **Due Today**, **Overdue**, and **Completed** with real-time count badges.
 - **Filter Toolbar:** Combined dropdown filtering by status (`pending`, `in_progress`, `completed`, `archived`) and priority (`low`, `medium`, `high`, `urgent`).
-- **Category Filtering:** Sidebar category selection with task count badges.
+- **Category Filtering:** Sidebar custom category selection and filtering to isolate tasks by category.
 
 ### 4. Custom Category Management
-- User-scoped custom category creation with color picker presets.
+- User-scoped custom category creation with curated color presets.
 - Category assignment to tasks and safe deletion with foreign-key nullification (`ON DELETE SET NULL`).
 
 ### 5. Multi-Canvas Theming & Accent Color Studio
 - **6 Base Canvas Themes:** `Dark Slate`, `Clean Light`, `OLED Pitch`, `Evergreen Nocturne`, `Cyberpunk Twilight`, and `Nordic Frost`.
 - **8 Accent Color Presets:** Electric Indigo, Ocean Sapphire, Emerald Mint, Neon Rose, Sunset Amber, Amethyst Purple, Teal Horizon, and Crimson Ruby.
-- **Custom Accent Studio:** Real-time hex color input, WCAG 2.1 contrast calculation, dynamic CSS variable derivation (`--primary-50` through `--primary-700`), and `localStorage` persistence.
+- **Appearance Customizer Studio:** Interactive modal featuring base canvas cards, brand accent palette picker, live component preview, reset to defaults, and `localStorage` persistence.
 - **Header Quick-Toggle:** One-click instant daylight/nightlight toggle.
 
 ---
@@ -197,25 +197,25 @@ Never commit `.env` files containing real passwords, secret keys, or database co
 | :--- | :---: | :--- | :--- |
 | `PORT` | No | `5000` | Port on which the Express server listens. |
 | `NODE_ENV` | No | `development` | Environment mode (`development`, `test`, `production`). |
-| `CLIENT_URL` | Yes | `http://localhost:5173` | Allowed CORS origin (must match your frontend domain in production). |
-| `DATABASE_URL` | Optional | `null` | Full PostgreSQL connection URI (preferred in cloud environments). |
-| `DB_HOST` | Conditional | `localhost` | Database host (used if `DATABASE_URL` is not provided). |
+| `CLIENT_URL` | **Yes (Prod)** | `http://localhost:5173` | Allowed CORS origin. In development defaults to localhost; in production, must match your deployed frontend origin. |
+| `DATABASE_URL` | Optional | `null` | Full PostgreSQL connection URI (preferred in cloud deployments like Neon). |
+| `DB_HOST` | Conditional | `localhost` | Database host (used if `DATABASE_URL` is omitted). |
 | `DB_PORT` | Conditional | `5432` | Database port. |
 | `DB_NAME` | Conditional | `taskflow_db` | Database name. |
 | `DB_USER` | Conditional | `postgres` | Database username. |
 | `DB_PASSWORD` | Conditional | `postgres` | Database password. |
 | `DB_POOL_MAX` | No | `20` | Maximum connections in the `pg` pool. |
 | `DB_IDLE_TIMEOUT_MILLIS` | No | `30000` | Idle connection timeout in milliseconds. |
-| `JWT_SECRET` | **Yes** | — | Secret key for signing JWTs (must be a strong 32+ char string in production). |
+| `JWT_SECRET` | **Yes (Prod)** | dev fallback | Secret key for signing JWTs. Enforced by a fatal startup check in `production` mode. |
 | `JWT_EXPIRES_IN` | No | `7d` | JWT token validity duration. |
 | `BCRYPT_SALT_ROUNDS` | No | `12` | Cost factor for password hashing. |
-| `SKIP_DNS_CHECK` | No | `false` | Set to `true` to bypass outbound DNS MX checks in restricted network environments. |
+| `SKIP_DNS_CHECK` | No | `false` | Set to `true` to bypass outbound DNS MX checks in restricted or offline environments (automatically bypassed in `test`). |
 
 ### Frontend (`client/.env`)
 
 | Variable | Required | Default | Description |
 | :--- | :---: | :--- | :--- |
-| `VITE_API_BASE_URL` | No | `/api/v1` | Base URL for API requests. Set to the production backend URL (e.g. `https://api.example.com/api/v1`) during production build. |
+| `VITE_API_BASE_URL` | **Yes (Prod)** | `/api/v1` | Base URL for API requests. In development, relies on Vite's local dev proxy; in production build, must point to the deployed backend URL (e.g. `https://<render-service>.onrender.com/api/v1`). |
 
 ---
 
@@ -282,10 +282,10 @@ npm run test:e2e
 
 ## 🛡️ Security Model
 
-- **Authentication:** Stateless JSON Web Tokens (JWT) passed via `Authorization: Bearer <token>` header with HTTP-only cookie fallback.
+- **Authentication:** Stateless JSON Web Tokens (JWT) stored client-side and transmitted via the `Authorization: Bearer <token>` HTTP header on all API requests. The backend also issues an HTTP-only cookie (`SameSite=Strict`), which serves as a fallback for same-origin workflows (such as local development via the Vite proxy); in cross-domain production environments (Vercel to Render), authentication relies directly on the Bearer token header.
 - **Password Protection:** Passwords hashed with native `bcrypt` using 12 salt rounds. Minimum 8 characters with alphanumeric validation enforced.
-- **SQL Injection Prevention:** 100% of database queries use parameterized SQL via `pg`. Direct string interpolation into queries is prohibited.
-- **Multi-Tenant User Scoping:** Every task and category query strictly enforces `WHERE user_id = $1`. Cross-user data access is structurally impossible.
+- **SQL Injection Prevention:** All application data queries use parameterized SQL placeholders (`$1, $2, ...`) via `node-postgres` (`pg`) for user-supplied inputs, with dynamic order fields strictly validated against predefined column whitelists to prevent SQL injection.
+- **Multi-Tenant User Scoping:** Application-level multi-tenant isolation enforces `WHERE user_id = $1` across all task and category CRUD operations in the repository layer, preventing authenticated users from accessing, modifying, or deleting another user's data.
 - **Email Authenticity Pipeline:**
   - Blocks 37+ known disposable and burner email domains (`mailinator.com`, `guerrillamail.com`, `tempmail.com`, etc.).
   - Algorithmic gibberish detection blocks keyboard walk patterns, excessive repeated characters, and unpronounceable consonant clusters.
@@ -308,8 +308,8 @@ All API responses follow a standardized JSON envelope structure:
 | `POST` | `/api/v1/auth/register` | Register new user with email authenticity validation | No |
 | `POST` | `/api/v1/auth/login` | Authenticate user and issue JWT bearer token | No |
 | `GET` | `/api/v1/auth/me` | Retrieve authenticated user profile | **Yes** |
-| `POST` | `/api/v1/auth/logout` | Clear session cookie | **Yes** |
-| `GET` | `/api/v1/categories` | List user custom categories with task counts | **Yes** |
+| `POST` | `/api/v1/auth/logout` | Clear session cookie | No |
+| `GET` | `/api/v1/categories` | List user custom categories | **Yes** |
 | `POST` | `/api/v1/categories` | Create a new category | **Yes** |
 | `PUT` | `/api/v1/categories/:id` | Update category name and color | **Yes** |
 | `DELETE` | `/api/v1/categories/:id` | Delete a category | **Yes** |
@@ -325,4 +325,4 @@ All API responses follow a standardized JSON envelope structure:
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](package.json).
+This project is open source and available under the [MIT License](LICENSE).
